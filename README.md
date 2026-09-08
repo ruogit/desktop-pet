@@ -1,10 +1,12 @@
 # Jili Desktop Pet
 
+![Jili Tiger](screenshot.png)
+
 A cute tiger desktop pet application built with Python + PyQt5. Jili is an adorable tiger character with a big head and small body, very cute! It will walk, idle, and interact with you on your desktop, providing practical features like timed eye care reminders.
 
 ## Features
 
-### � Core Features
+### 📝 Core Features
 - **Transparent frameless window**: Jili displays on your desktop with a transparent background, always on top
 - **Drag and drop interaction**: Drag Jili to any position on the screen with your mouse
 - **State system**: Includes idle, walking, sleeping, eating, waving, and other states
