@@ -20,7 +20,8 @@ class PetWindow(QWidget):
     drag_started = pyqtSignal()
     drag_ended = pyqtSignal()
     position_changed = pyqtSignal(int, int)
-    
+    walking_finished = pyqtSignal()
+
     def __init__(self):
         super().__init__()
 
@@ -164,6 +165,8 @@ class PetWindow(QWidget):
             self.move(self.walking_target)
             self.position_changed.emit(self.walking_target.x(), self.walking_target.y())
             self.walking_target = QPoint(0, 0)
+            self.physics_timer.stop()
+            self.walking_finished.emit()
         else:
             normalized = direction / (direction.manhattanLength() / WALK_SPEED)
             new_pos = current_pos + QPoint(int(normalized.x()), int(normalized.y()))
