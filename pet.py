@@ -1,5 +1,5 @@
 """
-Pet window for 吉布丁 Desktop Pet
+Pet window for Jili Desktop Pet
 Main window class with transparent background, drag functionality, and position management
 """
 
@@ -23,7 +23,7 @@ class PetWindow(QWidget):
     
     def __init__(self):
         super().__init__()
-        
+
         # Window setup
         self.setFixedSize(PET_WINDOW_SIZE)
         self.setWindowFlags(
@@ -31,8 +31,11 @@ class PetWindow(QWidget):
             Qt.WindowStaysOnTopHint |
             Qt.Tool
         )
-        self.setAttribute(Qt.WA_TranslucentBackground) 
+        self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
+
+        # Prevent window from being hidden by system
+        self.setAttribute(Qt.WA_QuitOnClose, False)
         
         # Click-through when idle
         # self.setAttribute(Qt.WA_TransparentForMouseEvents, True)
@@ -157,23 +160,17 @@ class PetWindow(QWidget):
         """Update walking animation"""
         current_pos = self.pos()
         direction = self.walking_target - current_pos
-        
         if direction.manhattanLength() < WALK_SPEED:
-            # Reached target
             self.move(self.walking_target)
+            self.position_changed.emit(self.walking_target.x(), self.walking_target.y())
             self.walking_target = QPoint(0, 0)
         else:
-            # Move towards target
             normalized = direction / (direction.manhattanLength() / WALK_SPEED)
             new_pos = current_pos + QPoint(int(normalized.x()), int(normalized.y()))
             self.move(new_pos)
-            
-            # Emit position change for bubble to follow
-            self.position_changed.emit(new_pos.x(), new_pos.y())
-            
-            # Update walking direction
             self.walking_direction = 1 if normalized.x() > 0 else -1
-    
+            self.position_changed.emit(new_pos.x(), new_pos.y())
+  
     def set_sprite(self, pixmap):
         """Set the current sprite to display"""
         self.current_pixmap = pixmap
@@ -241,14 +238,21 @@ class PetWindow(QWidget):
     
     def paintEvent(self, event):
         """Paint the current sprite"""
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        
-        if self.current_pixmap:
-            # Draw sprite centered
-            x = (self.width() - self.current_pixmap.width()) // 2
-            y = (self.height() - self.current_pixmap.height()) // 2
-            painter.drawPixmap(x, y, self.current_pixmap)
+        try:
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.Antialiasing)
+
+            if self.current_pixmap:
+                # Draw sprite centered
+                x = (self.width() - self.current_pixmap.width()) // 2
+                y = (self.height() - self.current_pixmap.height()) // 2
+                painter.drawPixmap(x, y, self.current_pixmap)
+            else:
+                print("Warning: current_pixmap is None in paintEvent")
+        except Exception as e:
+            print(f"PaintEvent error: {e}")
+            import traceback
+            traceback.print_exc()
     
     def mousePressEvent(self, event):
         """Handle mouse press events"""
@@ -281,6 +285,11 @@ class PetWindow(QWidget):
     def leaveEvent(self, event):
         """Handle mouse leave"""
         pass
+
+    def closeEvent(self, event):
+        """Handle window close event - prevent accidental closing"""
+        print("Pet window close event triggered - ignoring")
+        event.ignore()
     
     def show_context_menu(self, global_pos):
         """Show context menu at global position"""
