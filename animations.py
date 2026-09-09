@@ -1,5 +1,5 @@
 """
-Animation manager for 吉布丁 Desktop Pet
+Animation manager for Jili Desktop Pet
 Handles frame sequencing, timing, and animation loops
 """
 
