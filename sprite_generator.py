@@ -1,5 +1,5 @@
 """
-Sprite generator for 吉布丁 Desktop Pet
+Sprite generator for Jili Desktop Pet
 Creates all character animation frames using QPainter
 """
 
