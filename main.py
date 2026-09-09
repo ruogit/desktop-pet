@@ -118,6 +118,11 @@ class JiliApp:
         self.pet_window.drag_started.connect(on_drag_started)
         self.pet_window.drag_ended.connect(on_drag_ended)
         self.pet_window.position_changed.connect(self._update_bubble_position)
+        # When walking finishes, go back to IDLE
+        def on_walking_finished():
+            self.state_machine.set_state(PetState.IDLE)
+
+        self.pet_window.walking_finished.connect(on_walking_finished)
         print("Components wired")
 
     def _show_reminder_settings_dialog(self):
@@ -305,11 +310,8 @@ class JiliApp:
     def _auto_behavior(self):
         current = self.state_machine.get_current_state()
         if current == PetState.IDLE:
-            if random.random() < 0.6:  
+            if random.random() < 0.6:
                 self.state_machine.set_state(PetState.WALKING)
-        elif current == PetState.WALKING:
-            if random.random() < 0.3:  
-                self.state_machine.set_state(PetState.IDLE)
         elif current in [PetState.REMINDING, PetState.WAVING, PetState.EATING]:
             self.state_machine.set_state(PetState.IDLE)
 
