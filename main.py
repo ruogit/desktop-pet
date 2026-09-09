@@ -111,7 +111,7 @@ class JiliApp:
 
         def on_drag_ended():
             self.state_machine.set_state(PetState.IDLE)
-            self.auto_timer.start(8000)
+            self.auto_timer.start(6000)
             # Update bubble position after drag ends
             self.chat_bubble.position_above_pet(self.pet_window)
 
@@ -265,6 +265,7 @@ class JiliApp:
             # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
+            QTimer.singleShot(5000, lambda: self.animation_manager.set_state(PetState.IDLE))
         except Exception as e:
             print(f"Eye reminder error: {e}")
 
@@ -275,6 +276,7 @@ class JiliApp:
             # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
+            QTimer.singleShot(5000, lambda: self.animation_manager.set_state(PetState.IDLE))
         except Exception as e:
             print(f"Water reminder error: {e}")
 
@@ -285,6 +287,7 @@ class JiliApp:
             # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
+            QTimer.singleShot(5000, lambda: self.animation_manager.set_state(PetState.IDLE))
         except Exception as e:
             print(f"Activity reminder error: {e}")
 
@@ -302,9 +305,12 @@ class JiliApp:
     def _auto_behavior(self):
         current = self.state_machine.get_current_state()
         if current == PetState.IDLE:
-            if random.random() < 0.5:
+            if random.random() < 0.6:  
                 self.state_machine.set_state(PetState.WALKING)
         elif current == PetState.WALKING:
+            if random.random() < 0.3:  
+                self.state_machine.set_state(PetState.IDLE)
+        elif current in [PetState.REMINDING, PetState.WAVING, PetState.EATING]:
             self.state_machine.set_state(PetState.IDLE)
 
     def _check_pet_visibility(self):
