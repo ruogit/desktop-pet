@@ -70,6 +70,8 @@ class JiliApp:
                 self.pet_window.start_walking(target_x)
             elif new_state == PetState.IDLE:
                 self.pet_window.stop_walking()
+                # Update bubble position when stopping
+                self.chat_bubble.position_above_pet(self.pet_window)
 
         self.state_machine.state_changed.connect(on_state_changed)
         print("State machine created")
@@ -83,6 +85,18 @@ class JiliApp:
         self.activity_interval = DEFAULT_ACTIVITY_INTERVAL
 
     def _wire_components(self):
+        # Stop everything when exit is triggered
+        def on_exit():
+            self.auto_timer.stop()
+            self.chat_timer.stop()
+            self.eye_timer.stop()
+            self.water_timer.stop()
+            self.activity_timer.stop()
+            self.visibility_check_timer.stop()
+            self.chat_bubble.hide()
+            self.pet_window.hide()
+
+        self.app.aboutToQuit.connect(on_exit)
         print("Wiring components...")
         self.animation_manager.frame_ready.connect(self.pet_window.set_sprite)
         self.interaction_manager.request_state_change.connect(self.animation_manager.set_state)
@@ -98,6 +112,8 @@ class JiliApp:
         def on_drag_ended():
             self.state_machine.set_state(PetState.IDLE)
             self.auto_timer.start(8000)
+            # Update bubble position after drag ends
+            self.chat_bubble.position_above_pet(self.pet_window)
 
         self.pet_window.drag_started.connect(on_drag_started)
         self.pet_window.drag_ended.connect(on_drag_ended)
@@ -188,6 +204,11 @@ class JiliApp:
         self.auto_timer.timeout.connect(self._auto_behavior)
         self.auto_timer.start(8000)
 
+        # Add visibility check timer
+        self.visibility_check_timer = QTimer()
+        self.visibility_check_timer.timeout.connect(self._check_pet_visibility)
+        self.visibility_check_timer.start(5000)  # Check every 5 seconds
+
         self._start_random_chat_timer()
         self._start_reminder_timers()
 
@@ -202,9 +223,13 @@ class JiliApp:
         try:
             message = random.choice(RANDOM_CHAT_MESSAGES)
             self.chat_bubble.show_message(message, SMALL_BUBBLE_DURATION)
+            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
+            print(f"Random chat shown: {message}")
         except Exception as e:
             print(f"Random chat error: {e}")
+            import traceback
+            traceback.print_exc()
         interval = random.randint(RANDOM_CHAT_MIN, RANDOM_CHAT_MAX) * 1000
         self.chat_timer.start(interval)
 
@@ -237,6 +262,7 @@ class JiliApp:
         try:
             message = random.choice(EYE_REMINDER_MESSAGES).format(minutes=self.eye_interval)
             self.chat_bubble.show_message(message, 10000)
+            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
         except Exception as e:
@@ -246,6 +272,7 @@ class JiliApp:
         try:
             message = random.choice(WATER_REMINDER_MESSAGES)
             self.chat_bubble.show_message(message, 10000)
+            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
         except Exception as e:
@@ -255,14 +282,22 @@ class JiliApp:
         try:
             message = random.choice(ACTIVITY_REMINDER_MESSAGES)
             self.chat_bubble.show_message(message, 10000)
+            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
         except Exception as e:
             print(f"Activity reminder error: {e}")
 
     def _update_bubble_position(self, x, y):
-        if self.chat_bubble.isVisible():
-            self.chat_bubble.position_above_pet(self.pet_window)
+        # Always update bubble position, even if not visible
+        # This ensures bubble is at correct position when it becomes visible
+        self.chat_bubble.position_above_pet(self.pet_window)
+
+        # Ensure pet window stays visible
+        if not self.pet_window.isVisible():
+            print("Warning: Pet window became invisible, showing it again")
+            self.pet_window.show()
+            self.pet_window.raise_()
 
     def _auto_behavior(self):
         current = self.state_machine.get_current_state()
@@ -271,6 +306,15 @@ class JiliApp:
                 self.state_machine.set_state(PetState.WALKING)
         elif current == PetState.WALKING:
             self.state_machine.set_state(PetState.IDLE)
+
+    def _check_pet_visibility(self):
+        """Periodically check if pet window is still visible"""
+        if not self.pet_window.isVisible():
+            print("WARNING: Pet window became invisible! Restoring...")
+            self.pet_window.show()
+            self.pet_window.raise_()
+            self.pet_window.activateWindow()
+            print("Pet window restored")
 
     def run(self):
         print("Starting event loop...")
@@ -286,6 +330,16 @@ def main():
         print("JiliApp created, running...")
         app.pet_window.update()
         app.app.processEvents()
+
+        # Install global exception handler
+        def handle_exception(exc_type, exc_value, exc_traceback):
+            print("=== UNHANDLED EXCEPTION ===")
+            import traceback
+            traceback.print_exception(exc_type, exc_value, exc_traceback)
+            print("==========================")
+
+        sys.excepthook = handle_exception
+
         sys.exit(app.run())
     except Exception as e:
         print(f"Error starting application: {e}")
