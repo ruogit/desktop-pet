@@ -38,11 +38,11 @@ class StateMachine(QObject):
         
         # Timer for automatic state transitions
         self.state_timer = QTimer()
-        self.state_timer.timeout.connect(self._handle_state_timeout)
+        # self.state_timer.timeout.connect(self._handle_state_timeout)
         
         # Inactivity timer for sleep
         self.inactivity_timer = QTimer()
-        self.inactivity_timer.timeout.connect(self._handle_inactivity)
+        # self.inactivity_timer.timeout.connect(self._handle_inactivity)
         
         # Flag to prevent automatic transitions during user interaction
         self.user_interacting = False
