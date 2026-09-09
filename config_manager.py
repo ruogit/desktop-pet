@@ -1,5 +1,5 @@
 """
-Configuration manager for 吉布丁 Desktop Pet
+Configuration manager for Jili Desktop Pet
 Handles loading and saving user settings to JSON file
 """
 
