@@ -1,5 +1,5 @@
 """
-System tray icon for 吉布丁 Desktop Pet
+System tray icon for Jili Desktop Pet
 Provides tray icon with context menu and tooltip
 """
 
