@@ -1,5 +1,5 @@
 """
-State machine system for 吉布丁 Desktop Pet
+State machine system for Jili Desktop Pet
 Defines pet states and manages state transitions
 """
 
