@@ -1,5 +1,5 @@
 """
-Random events and affection system for 吉布丁 Desktop Pet
+Random events and affection system for Jili Desktop Pet
 Handles random chat bubbles and affection-based behaviors
 """
 
