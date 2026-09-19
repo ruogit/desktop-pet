@@ -267,10 +267,9 @@ class JiliApp:
         try:
             message = random.choice(EYE_REMINDER_MESSAGES).format(minutes=self.eye_interval)
             self.chat_bubble.show_message(message, 10000)
-            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
-            QTimer.singleShot(5000, lambda: self.animation_manager.set_state(PetState.IDLE))
+            QTimer.singleShot(5000, self._safe_return_to_idle)
         except Exception as e:
             print(f"Eye reminder error: {e}")
 
@@ -278,10 +277,9 @@ class JiliApp:
         try:
             message = random.choice(WATER_REMINDER_MESSAGES)
             self.chat_bubble.show_message(message, 10000)
-            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
-            QTimer.singleShot(5000, lambda: self.animation_manager.set_state(PetState.IDLE))
+            QTimer.singleShot(5000, self._safe_return_to_idle)
         except Exception as e:
             print(f"Water reminder error: {e}")
 
@@ -289,12 +287,21 @@ class JiliApp:
         try:
             message = random.choice(ACTIVITY_REMINDER_MESSAGES)
             self.chat_bubble.show_message(message, 10000)
-            # Update position after showing to ensure it's above current pet position
             self.chat_bubble.position_above_pet(self.pet_window)
             self.animation_manager.set_state(PetState.REMINDING)
-            QTimer.singleShot(5000, lambda: self.animation_manager.set_state(PetState.IDLE))
+            QTimer.singleShot(5000, self._safe_return_to_idle)
         except Exception as e:
             print(f"Activity reminder error: {e}")
+
+    def _safe_return_to_idle(self):
+        """Safely return to IDLE state"""
+        try:
+            if self.animation_manager.has_frames(PetState.IDLE):
+                self.animation_manager.set_state(PetState.IDLE)
+            else:
+                print("WARNING: No IDLE frames available!")
+        except Exception as e:
+            print(f"Safe return to idle error: {e}")
 
     def _update_bubble_position(self, x, y):
         # Always update bubble position, even if not visible
