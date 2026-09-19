@@ -50,31 +50,34 @@ class AnimationManager(QObject):
         self.frames[state] = frame_list
     
     def set_state(self, state):
-        """
-        Set the current animation state
-        
-        Args:
-            state: PetState to animate
-        """
+        """Set the current animation state"""
         if state == self.current_state:
             return
-        
+
+        new_frames = self.frames.get(state, [])
+        if not new_frames:
+            print(f"WARNING: No frames for state {state}, keeping current state {self.current_state}")
+            return
+
         self.current_state = state
         self.current_frame_index = 0
-        self.current_frames = self.frames.get(state, [])
-        
-        # Set timing based on state
+        self.current_frames = new_frames
+        print(f"State changed to {state}, frames: {len(self.current_frames)}")
+
         if state in [PetState.WALKING, PetState.EATING]:
             self.frame_timing = FRAME_TIMING_FAST
         elif state in [PetState.SLEEPING]:
             self.frame_timing = FRAME_TIMING_SLOW
         else:
             self.frame_timing = FRAME_TIMING_NORMAL
-        
-        # Restart timer with new timing
+
         if self.is_playing:
             self.animation_timer.stop()
             self.animation_timer.start(self.frame_timing)
+
+        # Immediately emit first frame to prevent blank
+        if self.current_frames:
+            self.frame_ready.emit(self.current_frames[0])
     
     def start_animation(self):
         """Start the animation loop"""
@@ -104,22 +107,18 @@ class AnimationManager(QObject):
     def _update_frame(self):
         """Update to the next frame"""
         if not self.current_frames:
+            print(f"WARNING: No frames in _update_frame, state={self.current_state}")
             return
-        
-        # Get current frame
+
         frame = self.current_frames[self.current_frame_index]
-        
-        # Handle direction flipping for walking
+
         if self.current_state == PetState.WALKING and not self.facing_right:
             frame = self._flip_frame_horizontally(frame)
-        
-        # Emit frame
+
         self.frame_ready.emit(frame)
-        
-        # Advance to next frame
+
         self.current_frame_index = (self.current_frame_index + 1) % len(self.current_frames)
-        
-        # Check if animation completed a full cycle
+
         if self.current_frame_index == 0:
             self.animation_complete.emit()
     
