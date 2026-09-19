@@ -53,6 +53,7 @@ class PetWindow(QWidget):
         
         # Current sprite
         self.current_pixmap = None
+        self.backup_pixmap = None
         self.current_frame = 0
         
         # Entry animation
@@ -176,8 +177,10 @@ class PetWindow(QWidget):
   
     def set_sprite(self, pixmap):
         """Set the current sprite to display"""
-        self.current_pixmap = pixmap
-        self.update()
+        if pixmap and not pixmap.isNull():
+            self.current_pixmap = pixmap
+            self.backup_pixmap = pixmap  # Always keep a backup
+            self.update()
     
     def set_click_through(self, enabled):
         """Set whether window is click-through"""
@@ -244,14 +247,14 @@ class PetWindow(QWidget):
         try:
             painter = QPainter(self)
             painter.setRenderHint(QPainter.Antialiasing)
-
-            if self.current_pixmap:
-                # Draw sprite centered
+            if self.current_pixmap and not self.current_pixmap.isNull():
                 x = (self.width() - self.current_pixmap.width()) // 2
                 y = (self.height() - self.current_pixmap.height()) // 2
                 painter.drawPixmap(x, y, self.current_pixmap)
-            else:
-                print("Warning: current_pixmap is None in paintEvent")
+            elif self.backup_pixmap and not self.backup_pixmap.isNull():
+                x = (self.width() - self.backup_pixmap.width()) // 2
+                y = (self.height() - self.backup_pixmap.height()) // 2
+                painter.drawPixmap(x, y, self.backup_pixmap)
         except Exception as e:
             print(f"PaintEvent error: {e}")
             import traceback
