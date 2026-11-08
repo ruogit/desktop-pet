@@ -1,3 +1,5 @@
+💼 我正在寻找新的发展机会。金融专业背景，转行IT，企业级存储及虚拟化运维工程师，连年持续客户好评量第一，也做 AI 工具，对海外工作兴趣浓厚，各类机会都欢迎交流：ruo.qian@outlook.com。
+
 # Jili Desktop Pet
 
 ![Jili Tiger](screenshot.png)
