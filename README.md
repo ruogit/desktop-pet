@@ -52,7 +52,7 @@ cd desktop-pet
 
 3. Install dependency packages:
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 Dependency list:
@@ -61,6 +61,11 @@ Dependency list:
 ## Running
 
 ### Start Application
+
+**Option 1: Double-click (Windows, recommended)**
+Double-click `start_pet.bat` in the project folder. Jili launches without a console window.
+
+**Option 2: Command line**
 Run in the project directory:
 ```bash
 python main.py
@@ -208,7 +213,8 @@ desktop-pet/
 ├── config_manager.py       # Configuration manager
 ├── random_events.py        # Random event manager
 ├── requirements.txt        # Dependency list
-└── README.md              # Project documentation
+├── start_pet.bat           # Windows launcher (no console window)
+└── README.md               # Project documentation
 ```
 
 ## Animation Effects
@@ -259,6 +265,9 @@ desktop-pet/
 
 **Q: Can't see Jili after program starts?**
 A: Check if other windows are blocking, Jili defaults to bottom right. Can show/hide via system tray icon.
+
+**Q: Nothing happens after double-clicking `start_pet.bat`?**
+A: The launcher uses `pythonw`, which hides error messages. Run `python main.py` in a terminal to see the error. Usually this means Python is not on PATH or dependencies are not installed (`python -m pip install -r requirements.txt`).
 
 **Q: Reminders not working?**
 A: Check if reminder settings are enabled, confirm via right-click menu → "Reminder Settings".
