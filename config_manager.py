@@ -3,6 +3,7 @@ Configuration manager for Jili Desktop Pet
 Handles loading and saving user settings to JSON file
 """
 
+import copy
 import json
 import os
 from pathlib import Path
@@ -15,7 +16,7 @@ class ConfigManager:
     
     def __init__(self):
         self.config_file = Path(CONFIG_FILE_PATH)
-        self.settings = DEFAULT_SETTINGS.copy()
+        self.settings = copy.deepcopy(DEFAULT_SETTINGS)
         
         # Load existing config if available
         self._load_config()
@@ -38,7 +39,7 @@ class ConfigManager:
         except (json.JSONDecodeError, IOError) as e:
             print(f"Error loading config: {e}")
             # Use defaults if load fails
-            self.settings = DEFAULT_SETTINGS.copy()
+            self.settings = copy.deepcopy(DEFAULT_SETTINGS)
             self._save_config()
     
     def _merge_settings(self, loaded_settings):
@@ -131,5 +132,5 @@ class ConfigManager:
     
     def reset_to_defaults(self):
         """Reset all settings to defaults"""
-        self.settings = DEFAULT_SETTINGS.copy()
+        self.settings = copy.deepcopy(DEFAULT_SETTINGS)
         self._save_config()
