@@ -8,14 +8,16 @@ from PyQt5.QtCore import QTimer
 from config import (PET_WINDOW_SIZE, RANDOM_CHAT_MIN, RANDOM_CHAT_MAX,
                      DEFAULT_EYE_INTERVAL, DEFAULT_WATER_INTERVAL, DEFAULT_ACTIVITY_INTERVAL,
                      RANDOM_CHAT_MESSAGES, EYE_REMINDER_MESSAGES, WATER_REMINDER_MESSAGES,
-                     ACTIVITY_REMINDER_MESSAGES, SMALL_BUBBLE_DURATION)
+                     ACTIVITY_REMINDER_MESSAGES, SMALL_BUBBLE_DURATION,  
+                     AUTO_BEHAVIOR_INTERVAL_MS)
 from sprite_generator import SpriteGenerator
 from pet import PetWindow
 from states import PetState, StateMachine
 from animations import AnimationManager
 from interactions import InteractionManager
 from bubble import ChatBubble
-
+from behavior import decide_auto_behavior
+from timing import minutes_to_ms
 
 class JiliApp:
     def __init__(self):
@@ -111,7 +113,7 @@ class JiliApp:
 
         def on_drag_ended():
             self.state_machine.set_state(PetState.IDLE)
-            self.auto_timer.start(6000)
+            self.auto_timer.start(AUTO_BEHAVIOR_INTERVAL_MS)
             # Update bubble position after drag ends
             self.chat_bubble.position_above_pet(self.pet_window)
 
@@ -207,7 +209,7 @@ class JiliApp:
 
         self.auto_timer = QTimer()
         self.auto_timer.timeout.connect(self._auto_behavior)
-        self.auto_timer.start(8000)
+        self.auto_timer.start(AUTO_BEHAVIOR_INTERVAL_MS)
 
         # Add visibility check timer
         self.visibility_check_timer = QTimer()
@@ -241,26 +243,26 @@ class JiliApp:
     def _start_reminder_timers(self):
         self.eye_timer = QTimer()
         self.eye_timer.timeout.connect(self._show_eye_reminder)
-        self.eye_timer.start(self.eye_interval * 60 * 1000)
+        self.eye_timer.start(minutes_to_ms(self.eye_interval))
         print(f"Eye reminder timer started (interval: {self.eye_interval} min)")
 
         self.water_timer = QTimer()
         self.water_timer.timeout.connect(self._show_water_reminder)
-        self.water_timer.start(self.water_interval * 60 * 1000)
+        self.water_timer.start(minutes_to_ms(self.water_interval))
         print(f"Water reminder timer started (interval: {self.water_interval} min)")
 
         self.activity_timer = QTimer()
         self.activity_timer.timeout.connect(self._show_activity_reminder)
-        self.activity_timer.start(self.activity_interval * 60 * 1000)
+        self.activity_timer.start(minutes_to_ms(self.activity_interval))
         print(f"Activity reminder timer started (interval: {self.activity_interval} min)")
 
     def _restart_reminder_timers(self):
         self.eye_timer.stop()
         self.water_timer.stop()
         self.activity_timer.stop()
-        self.eye_timer.start(self.eye_interval * 60 * 1000)
-        self.water_timer.start(self.water_interval * 60 * 1000)
-        self.activity_timer.start(self.activity_interval * 60 * 1000)
+        self.eye_timer.start(minutes_to_ms(self.eye_interval))
+        self.water_timer.start(minutes_to_ms(self.water_interval))
+        self.activity_timer.start(minutes_to_ms(self.activity_interval))
         print(f"Timers restarted: Eye={self.eye_interval}min, Water={self.water_interval}min, Activity={self.activity_interval}min")
 
     def _show_eye_reminder(self):
@@ -316,11 +318,10 @@ class JiliApp:
 
     def _auto_behavior(self):
         current = self.state_machine.get_current_state()
-        if current == PetState.IDLE:
-            if random.random() < 0.6:
-                self.state_machine.set_state(PetState.WALKING)
-        elif current in [PetState.REMINDING, PetState.WAVING, PetState.EATING]:
-            self.state_machine.set_state(PetState.IDLE)
+        next_state = decide_auto_behavior(current, random.random())
+        if next_state is not None:
+            self.state_machine.set_state(next_state)
+
 
     def _check_pet_visibility(self):
         """Periodically check if pet window is still visible"""

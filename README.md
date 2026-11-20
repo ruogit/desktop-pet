@@ -1,5 +1,7 @@
 # Jili Desktop Pet
 
+![CI](https://github.com/ruogit/desktop-pet/actions/workflows/ci.yml/badge.svg)
+
 ![Jili Tiger](screenshot.png)
 
 A cute tiger desktop pet application built with Python + PyQt5. Jili is an adorable tiger character with a big head and small body, very cute! It will walk, idle, and interact with you on your desktop, providing practical features like timed eye care reminders.
