@@ -166,7 +166,7 @@ IDLE, WALKING, DRAGGING, FALLING, SLEEPING, EATING, WAVING, REMINDING
 
 \- QTimer every 8 seconds checks whether to switch between IDLE and WALKING
 
-\- 50% probability to start walking when idle
+\- 60% probability to start walking when idle
 
 \- Random target\_x position across screen width
 
